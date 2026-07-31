@@ -10,6 +10,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<style>
+.auth-tab-btn { flex: 1; max-width: 140px; font-size: 14px !important; padding: 10px 18px !important; }
+</style>
 </head>
 <body>
 
@@ -20,22 +23,26 @@
 <div class="stage container">
 
   <!-- SCREEN 1: Sign up / Log in -->
-  <section class="screen active" id="screen-signup">
-    <div class="flex-fill d-flex flex-column justify-content-center">
-      <h1 class="wordmark text-center mb-4">Cini Tarot</h1>
-      <div class="avatar-picker mx-auto mb-3" id="avatarPicker">
-        <i class="bi bi-camera-fill"></i>
-      </div>
-
-      <input class="form-control candy-field mb-3" type="text" id="signupName" placeholder="Your name">
-      <input class="form-control candy-field mb-3" type="email" id="signupContact" placeholder="Email">
-      <input class="form-control candy-field mb-2" type="password" id="signupPassword" placeholder="Password (6+ characters)">
-      <p class="text-center mb-3" id="signupError" style="color:#FF7AA8; font-size:13px; min-height:16px;"></p>
-
-      <button class="btn btn-candy candy-blue w-100 mb-2" id="createAccountBtn">Create account</button>
-      <button class="btn btn-candy-ghost w-100" id="loginInsteadBtn">Already have an account? Log in</button>
+<section class="screen active" id="screen-signup">
+  <div class="flex-fill d-flex flex-column justify-content-center">
+    <h1 class="wordmark text-center mb-4">Cini Tarot</h1>
+    <div class="avatar-picker mx-auto mb-3" id="avatarPicker">
+      <i class="bi bi-camera-fill"></i>
     </div>
-  </section>
+
+    <div class="d-flex justify-content-center gap-2 mb-3">
+      <button class="btn btn-candy candy-blue auth-tab-btn" id="tabSignup" data-mode="signup">Sign Up</button>
+      <button class="btn btn-candy-ghost auth-tab-btn" id="tabLogin" data-mode="login">Log In</button>
+    </div>
+
+    <input class="form-control candy-field mb-3" type="text" id="signupName" placeholder="Your name">
+    <input class="form-control candy-field mb-3" type="email" id="signupContact" placeholder="Email">
+    <input class="form-control candy-field mb-2" type="password" id="signupPassword" placeholder="Password (6+ characters)">
+    <p class="text-center mb-3" id="signupError" style="color:#FF7AA8; font-size:13px; min-height:16px;"></p>
+
+    <button class="btn btn-candy candy-blue w-100" id="authSubmitBtn">Create account</button>
+  </div>
+</section>
 
   <!-- SCREEN 2: Home -->
   <section class="screen" id="screen-home">

@@ -199,19 +199,76 @@ function showScreen(id){
 }
 
 /* =========================================================
-   SIGN UP (real Supabase auth)
+   AUTO-LOGIN: check for an existing session on page load
    ========================================================= */
-document.getElementById('createAccountBtn').addEventListener('click', async () => {
+async function checkExistingSession(){
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session && session.user) {
+    const name = session.user.user_metadata?.name || 'friend';
+    document.getElementById('greetingText').textContent = `Welcome back, ${name}`;
+    showScreen('screen-home');
+  }
+}
+
+/* =========================================================
+   SIGN UP / LOG IN — tab switching
+   ========================================================= */
+let authMode = 'signup';
+
+function setAuthMode(mode){
+  authMode = mode;
+  const nameField = document.getElementById('signupName');
+  const submitBtn = document.getElementById('authSubmitBtn');
+  const tabSignup = document.getElementById('tabSignup');
+  const tabLogin = document.getElementById('tabLogin');
+  const errorEl = document.getElementById('signupError');
+
+  errorEl.style.color = '#FF7AA8';
+  errorEl.textContent = '';
+
+  if (mode === 'signup'){
+    nameField.style.display = 'block';
+    submitBtn.textContent = 'Create account';
+    tabSignup.className = 'btn btn-candy candy-blue auth-tab-btn';
+    tabLogin.className = 'btn btn-candy-ghost auth-tab-btn';
+  } else {
+    nameField.style.display = 'none';
+    submitBtn.textContent = 'Log in';
+    tabLogin.className = 'btn btn-candy candy-blue auth-tab-btn';
+    tabSignup.className = 'btn btn-candy-ghost auth-tab-btn';
+  }
+}
+
+document.getElementById('tabSignup').addEventListener('click', () => setAuthMode('signup'));
+document.getElementById('tabLogin').addEventListener('click', () => setAuthMode('login'));
+
+/* =========================================================
+   Basic email format check (a real safety net,
+   full verification happens via Supabase's confirmation email)
+   ========================================================= */
+function isValidEmail(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+}
+
+/* =========================================================
+   SIGN UP / LOG IN — submit handler
+   ========================================================= */
+document.getElementById('authSubmitBtn').addEventListener('click', async () => {
   const name = document.getElementById('signupName').value.trim() || 'friend';
   const email = document.getElementById('signupContact').value.trim();
   const password = document.getElementById('signupPassword').value;
   const errorEl = document.getElementById('signupError');
-  const btn = document.getElementById('createAccountBtn');
+  const btn = document.getElementById('authSubmitBtn');
 
+  errorEl.style.color = '#FF7AA8';
   errorEl.textContent = '';
 
   if (!email || !password) {
     errorEl.textContent = 'Please enter an email and password.';
+    return;
+  }
+  if (!isValidEmail(email)) {
+    errorEl.textContent = 'Please enter a valid email address.';
     return;
   }
   if (password.length < 6) {
@@ -220,24 +277,55 @@ document.getElementById('createAccountBtn').addEventListener('click', async () =
   }
 
   btn.disabled = true;
-  btn.textContent = 'Creating account...';
 
-  const { data, error } = await supabaseClient.auth.signUp({
-    email,
-    password,
-    options: { data: { name } }
-  });
+  if (authMode === 'signup'){
+    btn.textContent = 'Creating account...';
 
-  btn.disabled = false;
-  btn.textContent = 'Create account';
+    const { data, error } = await supabaseClient.auth.signUp({
+      email,
+      password,
+      options: { data: { name } }
+    });
 
-  if (error) {
-    errorEl.textContent = error.message;
-    return;
+    btn.disabled = false;
+    btn.textContent = 'Create account';
+
+    if (error) {
+      errorEl.textContent = error.message;
+      return;
+    }
+
+    // If email confirmation is required, Supabase won't return a session yet
+    if (!data.session) {
+      errorEl.style.color = '#2FDFC0';
+      errorEl.textContent = 'Account created! Check your email to confirm, then log in.';
+      setAuthMode('login');
+      return;
+    }
+
+    document.getElementById('greetingText').textContent = `Welcome, ${name}`;
+    showScreen('screen-home');
+
+  } else {
+    btn.textContent = 'Logging in...';
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    btn.disabled = false;
+    btn.textContent = 'Log in';
+
+    if (error) {
+      errorEl.textContent = error.message;
+      return;
+    }
+
+    const loggedInName = data.user.user_metadata?.name || 'friend';
+    document.getElementById('greetingText').textContent = `Welcome back, ${loggedInName}`;
+    showScreen('screen-home');
   }
-
-  document.getElementById('greetingText').textContent = `Welcome, ${name}`;
-  showScreen('screen-home');
 });
 
 /* =========================================================
@@ -446,3 +534,4 @@ document.getElementById('reshuffleBtn').addEventListener('click', () => {
    INIT
    ========================================================= */
 initMagicBackground();
+checkExistingSession();
