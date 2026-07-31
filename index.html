@@ -19,18 +19,21 @@
 
 <div class="stage container">
 
-  <!-- SCREEN 1: Sign up -->
+  <!-- SCREEN 1: Sign up / Log in -->
   <section class="screen active" id="screen-signup">
     <div class="flex-fill d-flex flex-column justify-content-center">
       <h1 class="wordmark text-center mb-4">Cini Tarot</h1>
       <div class="avatar-picker mx-auto mb-3" id="avatarPicker">
         <i class="bi bi-camera-fill"></i>
       </div>
+
       <input class="form-control candy-field mb-3" type="text" id="signupName" placeholder="Your name">
       <input class="form-control candy-field mb-3" type="email" id="signupContact" placeholder="Email">
       <input class="form-control candy-field mb-2" type="password" id="signupPassword" placeholder="Password (6+ characters)">
       <p class="text-center mb-3" id="signupError" style="color:#FF7AA8; font-size:13px; min-height:16px;"></p>
-      <button class="btn btn-candy candy-blue w-100" id="createAccountBtn">Create account</button>
+
+      <button class="btn btn-candy candy-blue w-100 mb-2" id="createAccountBtn">Create account</button>
+      <button class="btn btn-candy-ghost w-100" id="loginInsteadBtn">Already have an account? Log in</button>
     </div>
   </section>
 
