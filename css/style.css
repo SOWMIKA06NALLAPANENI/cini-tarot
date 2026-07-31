@@ -1,0 +1,459 @@
+/* =========================================================
+   TOKENS
+   ========================================================= */
+:root{
+  --bg-deep:#241246;
+  --bg-mid:#3a1f66;
+  --surface:#3B2159;
+  --text:#FFF8EE;
+  --text-dim:#D9CBEF;
+
+  /* candy palette: each has a light "base" and a darker "shadow" stop
+     the shadow stop is what gives the chunky pressed-button depth */
+  --purple-base:#9B6BF2;   --purple-dark:#5B21B6;
+  --teal-base:#2FDFC0;     --teal-dark:#0F766E;
+  --pink-base:#FF7AA8;     --pink-dark:#C21E63;
+  --gold-base:#FFC93C;     --gold-dark:#B45309;
+  --blue-base:#4FC3F7;     --blue-dark:#0369A1;
+}
+
+*{box-sizing:border-box;}
+
+body{
+  margin:0;
+  min-height:100vh;
+  background:radial-gradient(ellipse at 50% -10%, var(--bg-mid), var(--bg-deep) 60%);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  overflow-x:hidden;
+  position:relative;
+}
+
+/* =========================================================
+   FILM STRIP BORDER — top and bottom, like a physical reel,
+   ties the whole page back to "cinema" at a glance
+   ========================================================= */
+.film-strip{
+  position:fixed;
+  left:0;right:0;
+  height:22px;
+  background:#150a29;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:0 10px;
+  overflow:hidden;
+}
+.film-strip.top{top:0;}
+.film-strip.bottom{bottom:0;}
+.film-strip::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-image:repeating-linear-gradient(
+    to right,
+    rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 8px,
+    transparent 8px, transparent 22px
+  );
+  background-position:6px center;
+  background-repeat:repeat-x;
+  background-size:22px 10px;
+  opacity:0.6;
+}
+
+/* =========================================================
+   FLOATING CINEMA ICONS — reels, clapperboards, tickets
+   drifting among the stars, same twinkle treatment
+   ========================================================= */
+.cine-icon{
+  position:absolute;
+  color:rgba(255,255,255,0.18);
+  animation:twinkle 3.2s ease-in-out infinite;
+}
+
+/* =========================================================
+   AMBIENT MAGIC BACKGROUND
+   Twinkling stars + soft glow blobs, generated in JS,
+   styled here. Purely decorative, ignored by screen readers.
+   ========================================================= */
+.magic-bg{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+.glow-blob{
+  position:absolute;
+  border-radius:50%;
+  filter:blur(40px);
+  opacity:0.35;
+}
+.star{
+  position:absolute;
+  background:#fff;
+  border-radius:50%;
+  animation:twinkle 2.4s ease-in-out infinite;
+}
+@keyframes twinkle{
+  0%,100%{opacity:0.15; transform:scale(1);}
+  50%{opacity:0.9; transform:scale(1.4);}
+}
+.floaty{
+  position:absolute;
+  bottom:-10px;
+  border-radius:50%;
+  pointer-events:none;
+  animation:floatUp 4s linear forwards;
+}
+@keyframes floatUp{
+  0%{transform:translateY(0) translateX(0); opacity:0.9;}
+  100%{transform:translateY(-70vh) translateX(var(--drift,20px)); opacity:0;}
+}
+
+/* =========================================================
+   LAYOUT
+   ========================================================= */
+.stage{
+  max-width:480px;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  padding:44px 20px 56px;
+  position:relative;
+  z-index:1;
+}
+
+.screen{
+  display:none;
+  flex:1;
+  flex-direction:column;
+}
+.screen.active{
+  display:flex;
+}
+
+.wordmark{
+  font-family:'Baloo 2',cursive;
+  font-weight:800;
+  font-size:34px;
+  color:#fff;
+  text-shadow:0 3px 0 var(--purple-dark), 0 8px 16px rgba(0,0,0,0.4);
+  letter-spacing:0.01em;
+}
+
+h1,h2,h3{
+  font-family:'Baloo 2',cursive;
+  font-weight:700;
+  margin:0;
+}
+
+/* =========================================================
+   CHARACTER (placeholder shapes, swap for Spline later)
+   ========================================================= */
+.character{
+  width:120px;height:120px;
+  margin:0 auto 14px;
+  position:relative;
+  animation:bob 3s ease-in-out infinite;
+}
+.character-sm{width:76px;height:76px;margin-bottom:10px;}
+.char-glow{
+  position:absolute;
+  inset:-20px;
+  background:radial-gradient(circle, rgba(255,201,60,0.35), transparent 70%);
+  border-radius:50%;
+  animation:pulseGlow 2.5s ease-in-out infinite;
+}
+@keyframes pulseGlow{
+  0%,100%{opacity:0.5; transform:scale(1);}
+  50%{opacity:1; transform:scale(1.15);}
+}
+.character .head{
+  width:60%;height:60%;border-radius:50%;
+  background:#F4C9A8;
+  position:absolute;left:50%;top:34%;transform:translateX(-50%);
+  box-shadow:inset -6px -6px 0 rgba(0,0,0,0.06);
+}
+.character .hat{
+  width:0;height:0;
+  border-left:38% solid transparent;
+  border-right:38% solid transparent;
+  border-bottom:50% solid var(--purple-base);
+  position:absolute;left:50%;top:-6%;transform:translateX(-50%) rotate(-6deg);
+  filter:drop-shadow(0 4px 0 var(--purple-dark));
+}
+.character .brim{
+  width:88%;height:14%;border-radius:50%;
+  background:var(--surface);
+  position:absolute;left:50%;top:30%;transform:translateX(-50%);
+  box-shadow:0 3px 0 rgba(0,0,0,0.25);
+}
+@keyframes bob{
+  0%,100%{transform:translateY(0) rotate(0deg);}
+  50%{transform:translateY(-10px) rotate(2deg);}
+}
+
+.speech-bubble{
+  background:#fff;
+  color:var(--purple-dark);
+  border-radius:18px;
+  padding:12px 18px;
+  font-size:14px;
+  font-weight:500;
+  text-align:center;
+  margin-bottom:20px;
+  box-shadow:0 4px 0 rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.2);
+  position:relative;
+}
+.speech-bubble::after{
+  content:"";
+  position:absolute;
+  bottom:-8px;left:50%;
+  transform:translateX(-50%);
+  border-width:8px 8px 0;
+  border-style:solid;
+  border-color:#fff transparent transparent;
+}
+
+.greeting{
+  font-family:'Baloo 2',cursive;
+  font-weight:700;
+  font-size:24px;
+  color:#fff;
+  margin-bottom:4px;
+}
+
+/* =========================================================
+   CANDY BUTTONS — glossy, chunky, pressable
+   ========================================================= */
+.btn-candy{
+  font-family:'Baloo 2',cursive;
+  font-weight:700;
+  font-size:16px;
+  border:4px solid rgba(255,255,255,0.9);
+  border-radius:100px;
+  padding:14px 34px;
+  color:#fff;
+  text-shadow:0 2px 3px rgba(0,0,0,0.25);
+  transition:transform 0.1s ease, box-shadow 0.1s ease;
+}
+.btn-candy:disabled{opacity:0.4;}
+.btn-candy:active:not(:disabled){transform:translateY(4px);}
+
+.candy-purple{ background:linear-gradient(180deg,var(--purple-base),var(--purple-dark)); box-shadow:0 6px 0 var(--purple-dark), 0 10px 18px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5);}
+.candy-purple:active:not(:disabled){box-shadow:0 2px 0 var(--purple-dark), inset 0 2px 4px rgba(255,255,255,0.4);}
+
+.candy-teal{ background:linear-gradient(180deg,var(--teal-base),var(--teal-dark)); box-shadow:0 6px 0 var(--teal-dark), 0 10px 18px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5);}
+.candy-teal:active:not(:disabled){box-shadow:0 2px 0 var(--teal-dark), inset 0 2px 4px rgba(255,255,255,0.4);}
+
+.candy-pink{ background:linear-gradient(180deg,var(--pink-base),var(--pink-dark)); box-shadow:0 6px 0 var(--pink-dark), 0 10px 18px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5);}
+.candy-pink:active:not(:disabled){box-shadow:0 2px 0 var(--pink-dark), inset 0 2px 4px rgba(255,255,255,0.4);}
+
+.candy-gold{ background:linear-gradient(180deg,var(--gold-base),var(--gold-dark)); box-shadow:0 6px 0 var(--gold-dark), 0 10px 18px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5); color:#4A2E00;}
+.candy-gold:active:not(:disabled){box-shadow:0 2px 0 var(--gold-dark), inset 0 2px 4px rgba(255,255,255,0.4);}
+
+.candy-blue{ background:linear-gradient(180deg,var(--blue-base),var(--blue-dark)); box-shadow:0 6px 0 var(--blue-dark), 0 10px 18px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5);}
+.candy-blue:active:not(:disabled){box-shadow:0 2px 0 var(--blue-dark), inset 0 2px 4px rgba(255,255,255,0.4);}
+
+.btn-candy-ghost{
+  font-family:'Baloo 2',cursive;
+  font-weight:700;
+  font-size:14px;
+  background:transparent;
+  color:var(--text);
+  border:3px solid rgba(255,255,255,0.35);
+  border-radius:100px;
+  padding:10px 24px;
+}
+
+/* =========================================================
+   SIGN UP FIELDS
+   ========================================================= */
+.avatar-picker{
+  width:90px;height:90px;border-radius:50%;
+  background:var(--surface);
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;color:var(--text-dim);
+  border:4px dashed var(--purple-base);
+  cursor:pointer;
+}
+.candy-field{
+  background:var(--surface) !important;
+  border:3px solid rgba(255,255,255,0.15) !important;
+  border-radius:14px !important;
+  color:var(--text) !important;
+  padding:14px 16px !important;
+  font-family:'Inter',sans-serif;
+}
+.candy-field::placeholder{color:var(--text-dim);}
+.candy-field:focus{
+  border-color:var(--gold-base) !important;
+  box-shadow:0 0 0 3px rgba(255,201,60,0.3) !important;
+}
+
+/* =========================================================
+   QUESTION SCREEN
+   ========================================================= */
+.progress-dots{
+  display:flex;
+  gap:6px;
+  justify-content:center;
+  margin-bottom:16px;
+}
+.dot{
+  width:10px;height:10px;border-radius:50%;
+  background:var(--surface);
+  border:2px solid rgba(255,255,255,0.2);
+}
+.dot.filled{background:var(--gold-base); border-color:var(--gold-dark);}
+
+.question-text{
+  font-family:'Baloo 2',cursive;
+  font-weight:700;
+  font-size:20px;
+  color:#fff;
+  margin-bottom:4px;
+}
+.question-hint{
+  font-size:12px;
+  color:var(--text-dim);
+  margin-bottom:16px;
+}
+
+.options-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  flex:1;
+  align-content:start;
+}
+.option-card{
+  --c-base:#9B6BF2;
+  --c-dark:#5B21B6;
+  position:relative;
+  grid-column:span 1;
+  background:linear-gradient(160deg,var(--c-base),var(--c-dark));
+  /* Calm, thin, semi-transparent border at rest -- selection is what
+     earns the bold white border, so the two states read clearly apart. */
+  border:2px solid rgba(255,255,255,0.25);
+  border-radius:20px;
+  padding:20px 18px;
+  min-height:96px;
+  cursor:pointer;
+  color:#fff;
+  box-shadow:0 6px 0 var(--c-dark), 0 10px 16px rgba(0,0,0,0.3), inset 0 2px 5px rgba(255,255,255,0.35);
+  transition:transform 0.1s ease, box-shadow 0.1s ease, border-color 0.15s ease;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:5px;
+}
+.option-card:active{transform:translateY(3px);}
+.option-card.selected{
+  border:4px solid #fff;
+  transform:translateY(3px) scale(1.02) !important;
+  box-shadow:0 3px 0 var(--c-dark), 0 0 0 5px rgba(255,255,255,0.35), inset 0 2px 6px rgba(255,255,255,0.6);
+}
+.option-card .check-badge{
+  position:absolute;
+  top:-10px;
+  right:-10px;
+  width:28px;height:28px;
+  border-radius:50%;
+  background:#fff;
+  color:var(--c-dark);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  box-shadow:0 3px 6px rgba(0,0,0,0.3);
+}
+.option-card.selected .check-badge{display:flex;}
+.option-card .opt-label{
+  font-family:'Baloo 2',cursive;
+  font-weight:700;
+  font-size:16px;
+  text-shadow:0 1px 2px rgba(0,0,0,0.2);
+}
+.option-card .opt-desc{
+  font-size:12px;
+  color:rgba(255,255,255,0.9);
+  line-height:1.4;
+}
+.option-card.wide{grid-column:span 2;}
+
+/* =========================================================
+   REVEAL SCREEN
+   ========================================================= */
+.reveal-lead{
+  font-size:14px;
+  color:var(--text-dim);
+  margin-bottom:4px;
+}
+.cards-row{
+  display:flex;
+  gap:22px;
+  justify-content:center;
+  margin:22px 0;
+  perspective:1400px;
+}
+.tarot-card{
+  --c-base:#9B6BF2;
+  --c-dark:#5B21B6;
+  width:135px;
+  height:200px;
+  position:relative;
+  transform-style:preserve-3d;
+  transition:transform 0.8s cubic-bezier(.34,1.56,.64,1);
+  cursor:pointer;
+}
+.tarot-card.flipped{transform:rotateY(180deg) !important;}
+.tarot-face{
+  position:absolute;inset:0;
+  border-radius:16px;
+  backface-visibility:hidden;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:12px;
+  text-align:center;
+  border:4px solid rgba(255,255,255,0.85);
+}
+.tarot-back{
+  background:linear-gradient(160deg,var(--c-base),var(--c-dark));
+  box-shadow:0 6px 0 var(--c-dark), 0 10px 18px rgba(0,0,0,0.35), inset 0 2px 5px rgba(255,255,255,0.4);
+  animation:cardPulse 2.2s ease-in-out infinite;
+}
+@keyframes cardPulse{
+  0%,100%{box-shadow:0 6px 0 var(--c-dark), 0 10px 18px rgba(0,0,0,0.35), inset 0 2px 5px rgba(255,255,255,0.4);}
+  50%{box-shadow:0 6px 0 var(--c-dark), 0 10px 26px rgba(255,255,255,0.25), inset 0 2px 8px rgba(255,255,255,0.6);}
+}
+.tarot-back .mark{font-size:30px;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,0.3);}
+.tarot-front{
+  background:var(--surface);
+  transform:rotateY(180deg);
+}
+.tarot-front .t-title{
+  font-family:'Baloo 2',cursive;
+  font-weight:700;
+  font-size:15px;
+  color:#fff;
+  margin-bottom:4px;
+}
+.tarot-front .t-meta{
+  font-size:10px;
+  color:var(--text-dim);
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+}
+.reveal-desc{
+  font-size:13px;
+  color:var(--text-dim);
+  min-height:20px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .character,.char-glow,.tarot-back,.star,.floaty{animation:none;}
+  .tarot-card{transition:none;}
+}
